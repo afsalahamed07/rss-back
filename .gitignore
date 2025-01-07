@@ -176,5 +176,4 @@ dist
 README.md
 bun.lockb
 drizzle
-index.ts
 sqlite.db
