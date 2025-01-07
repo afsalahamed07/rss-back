@@ -17,7 +17,9 @@ rssRouter.get("/", async (c) => {
 
 rssRouter.post("/", async (c) => {
   const body = await c.req.json();
-  const link = body?.link;
+  const link = body?.link.trim();
+
+  console.log(link);
   try {
     // this might thrwo a "invalid url error"
     // thus validating the url string
@@ -43,7 +45,7 @@ rssRouter.post("/", async (c) => {
       title: title,
     });
   } catch (error: any) {
-    if ((error.code = "ERR_INVALID_URL")) {
+    if (error.code == "ERR_INVALID_URL") {
       return c.json({ msg: "invlaid url, check your url sturcture" }, 400, {
         "Content-Type": "application/json",
       });
