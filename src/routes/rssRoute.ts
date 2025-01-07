@@ -59,7 +59,7 @@ rssRouter.post("/", async (c) => {
       // the console log added here to check weather the error
       // can be managed properly or even sedning a better error response
       console.log(error);
-      return c.json({ msg: "Error occured in request" }, 500, {
+      return c.json({ msg: "Error fetching the provided url" }, 500, {
         "Content-Type": "application/json",
       });
     }
