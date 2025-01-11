@@ -1,13 +1,11 @@
 import { Hono } from "hono";
 import { db } from "../db/db";
 import { rss } from "../db/schema.ts";
+import { sleep } from "bun";
 
 const feedRoute = new Hono();
 
 feedRoute.get("/", async (c) => {
-  // NOTE: Fetch data for each RSS feed concurrently
-  // this required some sort of caching and queing
-  // and well inthe front end
   try {
     const rssList: (typeof rss.$inferSelect)[] = await db.select().from(rss);
 
@@ -17,29 +15,24 @@ feedRoute.get("/", async (c) => {
 
     const stream = new ReadableStream({
       async start(controller) {
-        controller.enqueue(encoder.encode("["));
-
         for (let i = 0; i < rssList.length; i++) {
           const rssItem = rssList[i];
+
           try {
-            const response = await fetch(rssItem.link); // Assuming `rssItem` contains a `url` field
+            const response = await fetch(rssItem.link);
             const text = await response.text();
             const chunk = JSON.stringify({ link: rssItem.link, data: text });
 
-            controller.enqueue(encoder.encode(chunk));
-            if (i < rssList.length - i) {
-              controller.enqueue(encoder.encode(","));
-            }
+            controller.enqueue(encoder.encode(chunk + "\n"));
           } catch (fetchError: any) {
             const errorChunk = JSON.stringify({
               link: rssItem.link,
               error: fetchError.message,
             });
-            controller.enqueue(encoder.encode(errorChunk));
+            controller.enqueue(encoder.encode(errorChunk + "\n"));
           }
+          await sleep(2000);
         }
-
-        controller.enqueue(encoder.encode("]"));
         controller.close();
       },
     });
