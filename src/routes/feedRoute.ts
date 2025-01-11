@@ -31,7 +31,6 @@ feedRoute.get("/", async (c) => {
             });
             controller.enqueue(encoder.encode(errorChunk + "\n"));
           }
-          await sleep(2000);
         }
         controller.close();
       },
