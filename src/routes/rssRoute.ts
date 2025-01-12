@@ -71,6 +71,7 @@ rssRouter.post("/", async (c) => {
 });
 
 rssRouter.delete("/:id", async (c) => {
+  console.log("gettin a request");
   const id = c.req.param("id");
 
   try {
@@ -78,8 +79,8 @@ rssRouter.delete("/:id", async (c) => {
   } catch (error) {
     console.log(error);
     // WARN: possbily the worst thin i can do sending out error
-    return c.text(`Error occured while deleting: ${error}`);
+    return c.json({ msg: `Error occured while deleting` }, 500);
   }
-  return c.text(`id : ${id} deleted from rss`);
+  return c.json({ msg: `id : ${id} deleted from rss` }, 204);
 });
 export default rssRouter;
