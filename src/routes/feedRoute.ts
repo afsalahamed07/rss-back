@@ -1,9 +1,18 @@
 import { Hono } from "hono";
 import { db } from "../db/db";
 import { rss } from "../db/schema.ts";
-import { sleep } from "bun";
+import Parser from "rss-parser";
 
 const feedRoute = new Hono();
+
+const parser = new Parser({
+  customFields: {
+    item: [
+      ["dc:subject", "subject"],
+      ["author.name", "author"],
+    ],
+  },
+});
 
 feedRoute.get("/", async (c) => {
   try {
@@ -19,15 +28,18 @@ feedRoute.get("/", async (c) => {
           const rssItem = rssList[i];
 
           try {
-            const response = await fetch(rssItem.link);
-            const text = await response.text();
-            const chunk = JSON.stringify({ link: rssItem.link, data: text });
+            const response = await parser.parseURL(rssItem.link);
+            // const text = await response.text();
+            const chunk = JSON.stringify({
+              link: rssItem.link,
+              feed: response,
+            });
 
             controller.enqueue(encoder.encode(chunk + "\n"));
-          } catch (fetchError: any) {
+          } catch (error: any) {
             const errorChunk = JSON.stringify({
               link: rssItem.link,
-              error: fetchError.message,
+              error: error.message,
             });
             controller.enqueue(encoder.encode(errorChunk + "\n"));
           }
