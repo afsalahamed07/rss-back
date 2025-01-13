@@ -11,7 +11,7 @@ export type FeedItem = {
   subject?: string[];
   author?: string;
   feedUrl: string;
-  doman?: string;
+  domain?: string;
 };
 
 export type Feed = {
