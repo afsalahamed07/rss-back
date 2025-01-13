@@ -8,8 +8,6 @@ const rssRouter = new Hono();
 rssRouter.get("/", async (c) => {
   const result = await db.select().from(rss);
 
-  console.log("result", result);
-
   return c.body(JSON.stringify(result), 200, {
     "Content-Type": "application/json",
   });
@@ -71,7 +69,6 @@ rssRouter.post("/", async (c) => {
 });
 
 rssRouter.delete("/:id", async (c) => {
-  console.log("gettin a request");
   const id = c.req.param("id");
 
   try {
