@@ -21,7 +21,6 @@ export async function feedCacher() {
 
   for (let i = 0; i < rssList.length; i++) {
     const rssItem = rssList[i];
-
     try {
       const response = await parser.parseURL(rssItem.link);
 
@@ -60,8 +59,9 @@ export async function feedCacher() {
   }
 }
 
-feedRoute.get("/", async (c) => {
+feedRoute.get("/:page", async (c) => {
   try {
+    const page = Number(c.req.param("page")) ?? 1;
     const encoder = new TextEncoder();
     c.header("Content-Type", "application/json");
     c.header("Transfer-Encoding", "chunked");
@@ -69,7 +69,11 @@ feedRoute.get("/", async (c) => {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const entries = await redis.zrevrange("pub:date", 0, 20);
+          const entries = await redis.zrevrange(
+            "pub:date",
+            (page - 1) * 20,
+            page * 20,
+          );
 
           for (const entry of entries) {
             const item = await redis.get(entry);
