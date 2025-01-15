@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { rss } from "../db/schema";
 import { db } from "../db/db";
 import { eq } from "drizzle-orm";
+import { feedCacher } from "./feedRoute";
 
 const rssRouter = new Hono();
 
@@ -17,7 +18,6 @@ rssRouter.post("/", async (c) => {
   const body = await c.req.json();
   const link = body?.link.trim();
 
-  console.log(link);
   try {
     // this might thrwo a "invalid url error"
     // thus validating the url string
@@ -42,6 +42,8 @@ rssRouter.post("/", async (c) => {
       link: link,
       title: title,
     });
+
+    feedCacher();
   } catch (error: any) {
     if (error.code == "ERR_INVALID_URL") {
       return c.json({ msg: "invlaid url, check your url sturcture" }, 400, {

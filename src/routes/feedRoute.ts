@@ -59,6 +59,10 @@ export async function feedCacher() {
   }
 }
 
+feedRoute.get("/size", async (c) => {
+  return c.json({ size: await redis.dbsize() }, 200);
+});
+
 feedRoute.get("/:page", async (c) => {
   try {
     const page = Number(c.req.param("page")) ?? 1;
